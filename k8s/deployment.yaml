@@ -59,7 +59,7 @@ spec:
       
       containers:
       - name: contoso-air
-        image: ghcr.io/dyu1208/contoso-air-automatic/contoso-air:latest
+        image: <AZURE_CONTAINER_REGISTRY>.azurecr.io/contoso-air:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000

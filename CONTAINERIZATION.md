@@ -52,9 +52,9 @@ The `k8s/` directory contains production-ready Kubernetes manifests with securit
 The `.github/workflows/deploy-to-aks.yml` provides continuous deployment:
 
 ### Features
-- **Container Registry**: GitHub Container Registry (ghcr.io)
+- **Container Registry**: Azure Container Registry (ACR)
 - **Image Tagging**: SHA-based and branch-based tags
-- **Security**: Uses GitHub token for registry access
+- **Security**: Uses Azure service principal for registry access
 - **Azure Integration**: Azure CLI and AKS authentication
 - **Deployment**: Uses Azure Kubernetes Deploy action
 
@@ -65,23 +65,43 @@ Configure these secrets in your GitHub repository:
 AZURE_CREDENTIALS - Azure service principal credentials (JSON format)
 AZURE_RESOURCE_GROUP - Name of the Azure resource group
 AZURE_CLUSTER_NAME - Name of the AKS cluster
+AZURE_CONTAINER_REGISTRY - Name of the Azure Container Registry (without .azurecr.io)
 ```
 
 ### Azure Service Principal Setup
 ```bash
-# Create service principal
+# Create service principal with ACR and AKS access
 az ad sp create-for-rbac --name "contoso-air-github" \
   --role contributor \
   --scopes /subscriptions/{subscription-id}/resourceGroups/{resource-group} \
   --sdk-auth
+
+# Grant ACR permissions (if ACR is in different resource group)
+az role assignment create \
+  --assignee {service-principal-app-id} \
+  --role AcrPush \
+  --scope /subscriptions/{subscription-id}/resourceGroups/{acr-resource-group}/providers/Microsoft.ContainerRegistry/registries/{acr-name}
+```
+
+### Azure Container Registry Setup
+```bash
+# Create Azure Container Registry (if not exists)
+az acr create --resource-group {resource-group} \
+  --name {acr-name} \
+  --sku Basic \
+  --admin-enabled false
+
+# Verify ACR access
+az acr list --resource-group {resource-group} --query "[].{Name:name,LoginServer:loginServer}"
 ```
 
 ## Deployment Instructions
 
 ### Prerequisites
 1. Azure subscription with AKS cluster
-2. GitHub repository with secrets configured
-3. Azure Container Registry or GitHub Container Registry access
+2. Azure Container Registry (ACR) in the same or different resource group
+3. GitHub repository with secrets configured
+4. Service principal with ACR and AKS access
 
 ### Manual Deployment
 ```bash
