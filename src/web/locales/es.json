@@ -1,5 +1,5 @@
 {
-  "Title": "Contoso Air",
+  "Title": "Contosos Air",
   "Home": {
     "HeroMessage": "Donde<br>quieres ir?"
   },
@@ -20,7 +20,7 @@
   },
   "Footer": {
     "About": {
-      "Title": "ACERCA CONTOSO",
+      "Title": "ACERCA CONTOSOS",
       "Link_1": "Quien somos",
       "Link_2": "Contactanos",
       "Link_3": "Consejos de viaje",

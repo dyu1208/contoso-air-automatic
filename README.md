@@ -1,4 +1,4 @@
-# contoso-air
+# contosos-air
 
 A sample airline booking application used for demos and learning purposes.
 
