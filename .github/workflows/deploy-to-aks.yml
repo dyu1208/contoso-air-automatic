@@ -1,0 +1,78 @@
+name: Build and Deploy to AKS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AZURE_CONTAINER_REGISTRY: contosoair  # Set this to your ACR name
+  CONTAINER_NAME: contosoair
+  RESOURCE_GROUP: rg-contosoair         # Set this to your resource group name
+  CLUSTER_NAME: aks-contosoair          # Set this to your AKS cluster name
+  DEPLOYMENT_MANIFEST_PATH: 'k8s'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Azure login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Build and push image to ACR
+      run: |
+        az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} --image ${{ env.CONTAINER_NAME }}:${{ github.sha }} .
+
+  deploy:
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Azure login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Set up kubelogin for non-interactive login
+      uses: azure/use-kubelogin@v1
+      with:
+        kubelogin-version: 'v0.0.25'
+
+    - name: Get K8s context
+      uses: azure/aks-set-context@v3
+      with:
+        resource-group: ${{ env.RESOURCE_GROUP }}
+        cluster-name: ${{ env.CLUSTER_NAME }}
+        admin: 'false'
+        use-kubelogin: 'true'
+
+    - name: Deploy to AKS
+      uses: azure/k8s-deploy@v1
+      with:
+        manifests: |
+          ${{ env.DEPLOYMENT_MANIFEST_PATH }}/configmap.yaml
+          ${{ env.DEPLOYMENT_MANIFEST_PATH }}/deployment.yaml
+          ${{ env.DEPLOYMENT_MANIFEST_PATH }}/service.yaml
+        images: |
+          ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }}
