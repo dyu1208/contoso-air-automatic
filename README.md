@@ -90,6 +90,27 @@ npm start
 
 Browse to `http://localhost:3000` to see the app.
 
+## Azure MCP for Copilot Coding Agent
+
+This repository is configured to work with the Azure MCP (Model Context Protocol) server for GitHub Copilot coding agent integration. The setup enables seamless connection between Copilot and Azure services such as Azure Cosmos DB and Azure Storage.
+
+### Configuration Files
+
+- `.github/workflows/copilot-setup-steps.yml` - GitHub Actions workflow for Azure authentication
+- `.mcp.json` - MCP server configuration for Azure services
+
+### Required Secrets
+
+To use the Azure MCP integration, configure the following secrets in your repository's Copilot environment:
+
+- `AZURE_CLIENT_ID` - Azure AD application client ID
+- `AZURE_TENANT_ID` - Azure AD tenant ID  
+- `AZURE_SUBSCRIPTION_ID` - Azure subscription ID
+
+### OIDC Setup
+
+Before using the Azure MCP, you must configure OIDC in a Microsoft Entra application to trust GitHub. Follow the guide: [Use the Azure Login action with OpenID Connect](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect).
+
 ## Cleanup
 
 ```bash
