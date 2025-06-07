@@ -8,7 +8,7 @@ WORKDIR /app
 COPY src/web/package*.json ./
 
 # Install dependencies
-RUN npm install --production
+RUN npm install --only=production --no-audit
 
 # Copy application code
 COPY src/web/ ./
