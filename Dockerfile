@@ -1,14 +1,24 @@
-# Use Node.js 22 as specified in prerequisites  
-FROM node:22
+# Use Node.js 22 as specified in prerequisites
+FROM node:22-slim
+
+# Install necessary system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy all source code  
-COPY src/web/ ./
+# Copy package files first for better layer caching
+COPY src/web/package*.json ./
 
-# Install dependencies (assuming this works in the actual CI environment)
-RUN npm install
+# Install dependencies
+RUN npm install --only=production
+
+# Copy application source code
+COPY src/web/ ./
 
 # Create non-root user for security
 RUN groupadd -r nodejs && useradd -r -g nodejs nodejs

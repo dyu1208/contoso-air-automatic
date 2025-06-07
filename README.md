@@ -111,6 +111,56 @@ To use the Azure MCP integration, configure the following secrets in your reposi
 
 Before using the Azure MCP, you must configure OIDC in a Microsoft Entra application to trust GitHub. Follow the guide: [Use the Azure Login action with OpenID Connect](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect).
 
+## Containerization and Kubernetes Deployment
+
+This repository includes Docker containerization and Kubernetes deployment manifests for deploying to Azure Kubernetes Service (AKS).
+
+### Docker
+
+Build and run the application in a container:
+
+```bash
+# Build the Docker image
+docker build -t contoso-air .
+
+# Run the container
+docker run -p 3000:3000 contoso-air
+```
+
+### Kubernetes Deployment
+
+The application can be deployed to AKS using the manifests in the `k8s/` directory:
+
+- **Security Features**: RuntimeDefault seccomp profile, non-root user, dropped capabilities
+- **Resilience**: Pod anti-affinity, topology spread constraints, health probes
+- **High Availability**: 3 replicas, load balancer service
+
+#### Manual Deployment
+
+```bash
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+
+#### Continuous Deployment
+
+The application is automatically deployed via GitHub Actions when changes are pushed to the main branch. 
+
+**Required GitHub Secrets for AKS Deployment:**
+- `AZURE_CLIENT_ID` - Azure AD application client ID
+- `AZURE_TENANT_ID` - Azure AD tenant ID
+- `AZURE_SUBSCRIPTION_ID` - Azure subscription ID
+- `AZURE_RESOURCE_GROUP` - Resource group containing the AKS cluster
+- `AZURE_AKS_CLUSTER_NAME` - Name of the AKS cluster
+
+**Setup Steps:**
+1. Create an AKS cluster and configure OIDC authentication
+2. Configure the GitHub secrets listed above
+3. Push to the main branch to trigger deployment
+
+See `k8s/README.md` for detailed deployment instructions.
+
 ## Cleanup
 
 ```bash
