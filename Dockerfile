@@ -4,11 +4,14 @@ FROM node:22-alpine
 # Set working directory
 WORKDIR /app
 
+# Install system dependencies for node-gyp if needed
+RUN apk add --no-cache python3 make g++
+
 # Copy package files
 COPY src/web/package*.json ./
 
 # Install dependencies
-RUN npm install --only=production --no-audit
+RUN npm install --omit=dev --verbose
 
 # Copy application code
 COPY src/web/ ./
