@@ -1,5 +1,5 @@
 {
-	"Title": "Contoso Air",
+	"Title": "Contosos Air",
 	"Home": {
 		"HeroMessage": "Where do you<br>want to go?"
 	},
@@ -20,7 +20,7 @@
 	},
 	"Footer": {
 		"About": {
-			"Title": "ABOUT CONTOSO",
+			"Title": "ABOUT CONTOSOS",
 			"Link_1": "Who we are",
 			"Link_2": "Contact us",
 			"Link_3": "Travel advisories",
