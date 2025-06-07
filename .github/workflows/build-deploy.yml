@@ -1,0 +1,77 @@
+name: Build and Deploy to AKS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  REGISTRY_NAME: acrcontosoair1
+  CLUSTER_NAME: aks-contoso-air1
+  CLUSTER_RESOURCE_GROUP: rg-contoso-air1
+  NAMESPACE: default
+  APP_NAME: contoso-air
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Azure
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Log in to Azure Container Registry
+      run: |
+        az acr login --name ${{ env.REGISTRY_NAME }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: |
+          ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
+          ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Set target Azure Kubernetes Service
+      uses: azure/aks-set-context@v3
+      with:
+        resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
+        cluster-name: ${{ env.CLUSTER_NAME }}
+
+    - name: Create namespace if not exists
+      run: |
+        kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Update image in deployment manifest
+      run: |
+        sed -i 's|image: contoso-air:latest|image: ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}|g' k8s/deployment.yaml
+
+    - name: Deploy to Azure Kubernetes Service
+      uses: azure/k8s-deploy@v4
+      with:
+        action: deploy
+        namespace: ${{ env.NAMESPACE }}
+        manifests: |
+          k8s/deployment.yaml
+        images: |
+          ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
+
+    - name: Check deployment status
+      run: |
+        kubectl rollout status deployment/${{ env.APP_NAME }} -n ${{ env.NAMESPACE }}
+        kubectl get services -n ${{ env.NAMESPACE }}
