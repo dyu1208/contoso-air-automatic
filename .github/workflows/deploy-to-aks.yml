@@ -8,10 +8,10 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_CONTAINER_REGISTRY: contosoair  # Set this to your ACR name
-  CONTAINER_NAME: contosoair
-  RESOURCE_GROUP: rg-contosoair         # Set this to your resource group name
-  CLUSTER_NAME: aks-contosoair          # Set this to your AKS cluster name
+  AZURE_CONTAINER_REGISTRY: contosoair1  # Set this to your ACR name
+  CONTAINER_NAME: contosoair1
+  RESOURCE_GROUP: rg-contosoair1         # Set this to your resource group name
+  CLUSTER_NAME: aks-contosoair1          # Set this to your AKS cluster name
   DEPLOYMENT_MANIFEST_PATH: 'k8s'
 
 jobs:
