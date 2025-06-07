@@ -9,9 +9,9 @@ on:
       - main
 
 env:
-  REGISTRY_NAME: your-acr-name
-  CLUSTER_NAME: your-aks-cluster
-  CLUSTER_RESOURCE_GROUP: your-resource-group
+  REGISTRY_NAME: acrcontosoair1
+  CLUSTER_NAME: aks-contoso-air1
+  CLUSTER_RESOURCE_GROUP: rg-contoso-air1
   NAMESPACE: default
   APP_NAME: contoso-air
 
