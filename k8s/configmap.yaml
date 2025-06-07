@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contoso-air-config
+  labels:
+    app: contoso-air
+data:
+  NODE_ENV: "production"
+  # Add other environment variables as needed
+  # For Azure CosmosDB integration, these can be added:
+  # AZURE_COSMOS_LISTCONNECTIONSTRINGURL: ""
+  # AZURE_COSMOS_SCOPE: "https://management.azure.com/.default"
+  # AZURE_COSMOS_CLIENTID: ""
